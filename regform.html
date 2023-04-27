@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Registration Form</title>
+  <style>
+    /* basic layout */
+body {
+  font-family: sans-serif;
+  padding: 1rem;
+}
+
+h1, h2 {
+  text-align: center;
+}
+
+form {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+/* form inputs */
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: bold;
+}
+
+input, select {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+input[type="checkbox"] {
+  display: inline-block;
+  width: auto;
+  margin-bottom: 0;
+}
+
+button[type="submit"] {
+  background-color: #007bff;
+  color: #fff;
+  border: none;
+  border-radius: 4px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+}
+
+/* table */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 2rem;
+}
+
+th, td {
+  text-align: left;
+  padding: 0.5rem;
+  border-bottom: 1px solid #ddd;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+/* error message */
+.error-message {
+  color: red;
+  font-weight: bold;
+  margin-bottom: 1rem;
+}
+
+  </style>
+</head>
+<body>
+  <h1>Registration Form</h1>
+  <form id="registration-form">
+    <div>
+      <label for="name">Name:</label>
+      <input type="text" id="name" name="name" required>
+    </div>
+    <div>
+      <label for="email">Email:</label>
+      <input type="email" id="email" name="email" required>
+    </div>
+    <div>
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" minlength="8" required>
+    </div>
+    <div>
+      <label for="dob">Date of Birth:</label>
+      <input type="date" id="dob" name="dob" required>
+    </div>
+    <div>
+      <label>
+        <input type="checkbox" id="terms" name="terms" required>
+        I accept the terms and conditions.
+      </label>
+    </div>
+    <button type="submit">Submit</button>
+  </form>
+  <div id="error-message"></div>
+  <table id="users-table">
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Date of Birth</th>
+        <th>Accepted terms?</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+  <script>
+const form = document.getElementById("registration-form");
+const errorMessage = document.getElementById("error-message");
+const usersTable = document.getElementById("users-table");
+const usersTableBody = usersTable.querySelector("tbody");
+
+const saveUserData = (userData) => {
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  users.push(userData);
+  localStorage.setItem("users", JSON.stringify(users));
+};
+
+const loadUserData = () => {
+  const users = JSON.parse(localStorage.getItem("users")) || [];
+  users.forEach((user) => {
+    const row = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    nameCell.textContent = user.name;
+    const emailCell = document.createElement("td");
+    emailCell.textContent = user.email;
+    const passwordCell = document.createElement("td");
+    passwordCell.textContent = user.password;
+    const dobCell = document.createElement("td");
+    dobCell.textContent = user.dob;
+    const termsCell = document.createElement("td");
+    termsCell.textContent = user.terms ? "Yes" : "No";
+    row.appendChild(nameCell);
+    row.appendChild(emailCell);
+    row.appendChild(passwordCell);
+    row.appendChild(dobCell);
+    row.appendChild(termsCell);
+    usersTableBody.appendChild(row);
+  });
+};
+
+loadUserData();
+
+form.addEventListener("submit", (event) => {
+  event.preventDefault();
+  const name = form.elements["name"].value;
+  const email = form.elements["email"].value;
+  const password = form.elements["password"].value;
+  const dob = form.elements["dob"].value;
+  const terms = form.elements["terms"].checked;
+  const age = calculateAge(dob);
+  if (age < 18 || age > 55) {
+    errorMessage.textContent = "You must be between 18 and 55 years old to register.";
+    return;
+  }
+  const userData = { name, email, password, dob, terms };
+  saveUserData(userData);
+  const row = document.createElement("tr");
+  const nameCell = document.createElement("td");
+  nameCell.textContent = name;
+  const emailCell = document.createElement("td");
+  emailCell.textContent = email;
+  const passwordCell = document.createElement("td");
+  passwordCell.textContent = password;
+  const dobCell = document.createElement("td");
+  dobCell.textContent = dob;
+  const termsCell = document.createElement("td");
+  termsCell.textContent = terms ? "Yes" : "No";
+  row.appendChild(nameCell);
+  row.appendChild(emailCell);
+  row.appendChild(passwordCell);
+  row.appendChild(dobCell);
+  row.appendChild(termsCell);
+  usersTableBody.appendChild(row);
+  form.reset();
+  errorMessage.textContent = "";
+});
+
+const calculateAge = (dateString) => {
+  const today = new Date();
+  const birthDate = new Date(dateString);
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const monthDiff = today.getMonth() - birthDate.getMonth();
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
+    age--;
+  }
+  return age;
+};
+  </script>
+</body>
+</html>
